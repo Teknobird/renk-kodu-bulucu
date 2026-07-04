@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renk Kodu Bulucu ve Dönüştürücü | TEKNOBIRD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#E63946;
+    --red-dark:#C81E2C;
+    --ink:#17181C;
+    --ink-soft:#4B4D57;
+    --paper:#FFFFFF;
+    --cloud:#F5F5F8;
+    --line:#E7E7ED;
+    --ok:#1E9E5A;
+    --warn:#C9862B;
+    --bad:#D8394A;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(23,24,28,.04), 0 8px 24px rgba(23,24,28,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--cloud);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    padding:20px;
+  }
+  .wrap{max-width:1040px;margin:0 auto;}
+
+  /* Header */
+  .head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;margin-bottom:20px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(145deg,var(--red),var(--red-dark));
+    position:relative;flex:none;
+    box-shadow:0 4px 10px rgba(230,57,70,.35);
+  }
+  .brand-mark::after{
+    content:"";position:absolute;inset:0;margin:auto;
+    width:12px;height:12px;border-radius:50%;background:#fff;
+    top:9px;left:9px;
+  }
+  .brand-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;letter-spacing:.2px;}
+  .brand-name span{color:var(--red);}
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--red);margin:0 0 6px;
+  }
+  h1{
+    font-family:'Poppins',sans-serif;font-weight:800;
+    font-size:26px;line-height:1.2;margin:0 0 6px;
+  }
+  .sub{color:var(--ink-soft);font-size:14.5px;margin:0;max-width:520px;}
+
+  /* Card shell */
+  .card{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+  }
+
+  /* Main grid */
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:18px;margin-bottom:18px;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  /* Picker panel */
+  .picker-panel{padding:20px;display:flex;flex-direction:column;gap:16px;}
+  .swatch-shell{
+    border-radius:12px;overflow:hidden;border:1px solid var(--line);
+    position:relative;
+  }
+  #swatch{
+    width:100%;height:150px;display:block;
+    transition:background-color .12s ease;
+  }
+  .swatch-shell input[type=color]{
+    position:absolute;inset:0;width:100%;height:100%;
+    opacity:0;cursor:pointer;border:none;padding:0;
+  }
+  .swatch-hint{
+    position:absolute;bottom:8px;right:10px;
+    background:rgba(23,24,28,.55);color:#fff;font-size:10.5px;
+    padding:4px 8px;border-radius:20px;font-weight:600;
+    pointer-events:none;letter-spacing:.2px;
+  }
+  .row-btns{display:flex;gap:8px;}
+  .btn{
+    flex:1;border:none;border-radius:9px;padding:10px 12px;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;
+    cursor:pointer;transition:transform .08s ease, background .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--red);color:#fff;}
+  .btn-primary:hover{background:var(--red-dark);}
+  .btn-ghost{background:var(--cloud);color:var(--ink);border:1px solid var(--line);}
+  .btn-ghost:hover{background:#ececf2;}
+
+  .name-tag{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--cloud);border:1px solid var(--line);border-radius:9px;
+    padding:9px 12px;
+  }
+  .name-tag .lbl{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+  .name-tag .val{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13.5px;}
+
+  .preview-mock{
+    border:1px dashed var(--line);border-radius:10px;padding:14px;
+    display:flex;flex-direction:column;gap:10px;background:#fff;
+  }
+  .preview-mock .p-title{font-size:10.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.8px;}
+  .mock-card{border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .mock-btn{
+    align-self:flex-start;padding:6px 14px;border-radius:20px;
+    font-size:12.5px;font-weight:700;color:#fff;
+  }
+  .mock-text{font-size:12px;color:var(--ink-soft);}
+
+  /* Formats panel */
+  .formats-panel{padding:20px;display:flex;flex-direction:column;gap:14px;}
+  .panel-title{
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:14.5px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .panel-title small{font-family:'Inter';font-weight:500;font-size:11.5px;color:var(--ink-soft);}
+
+  .fmt-row{
+    display:grid;grid-template-columns:56px 1fr auto;
+    align-items:center;gap:10px;
+    border:1px solid var(--line);border-radius:10px;padding:9px 10px;
+  }
+  .fmt-tag{
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:11.5px;
+    background:var(--cloud);color:var(--ink);border-radius:6px;
+    text-align:center;padding:5px 0;
+  }
+  .fmt-row input[type=text]{
+    font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;
+    border:none;outline:none;background:transparent;width:100%;color:var(--ink);
+  }
+  .copy-btn{
+    border:1px solid var(--line);background:#fff;border-radius:7px;
+    width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);transition:.15s;flex:none;
+  }
+  .copy-btn:hover{background:var(--cloud);color:var(--red);border-color:var(--red);}
+  .copy-btn svg{width:15px;height:15px;}
+
+  .sliders{display:flex;flex-direction:column;gap:10px;margin-top:2px;}
+  .slider-row{display:grid;grid-template-columns:20px 1fr 46px;align-items:center;gap:10px;}
+  .slider-row label{font-size:12px;font-weight:700;color:var(--ink-soft);}
+  .slider-row output{
+    font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;color:var(--ink-soft);
+  }
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;height:6px;border-radius:6px;
+    background:var(--line);outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--red);cursor:pointer;border:3px solid #fff;box-shadow:0 0 0 1px var(--red);
+  }
+  #r_slider::-webkit-slider-thumb{background:#e63946;}
+  #g_slider::-webkit-slider-thumb{background:#2a9d5c;}
+  #b_slider::-webkit-slider-thumb{background:#2f6fd6;}
+
+  /* Harmony section */
+  .section-title{
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;
+    margin:0 0 4px;
+  }
+  .section-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;}
+  .harmony-card{padding:18px 20px;margin-bottom:18px;}
+  .harmony-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  @media (max-width:600px){.harmony-strip{grid-template-columns:repeat(2,1fr);}}
+  .h-swatch{
+    border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--line);
+    transition:transform .1s ease;
+  }
+  .h-swatch:hover{transform:translateY(-2px);}
+  .h-swatch .fill{height:64px;}
+  .h-swatch .tag{
+    background:#fff;padding:7px 9px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  }
+  .h-swatch .tag small{
+    display:block;font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-soft);
+    font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;
+  }
+
+  /* Contrast section */
+  .contrast-card{padding:18px 20px;margin-bottom:18px;}
+  .contrast-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:600px){.contrast-grid{grid-template-columns:1fr;}}
+  .contrast-box{
+    border:1px solid var(--line);border-radius:10px;padding:16px;
+    display:flex;flex-direction:column;gap:10px;align-items:flex-start;
+  }
+  .contrast-box .big{font-size:20px;font-weight:700;}
+  .contrast-box .small{font-size:12.5px;}
+  .ratio-line{display:flex;align-items:center;gap:10px;width:100%;margin-top:4px;padding-top:10px;border-top:1px solid var(--line);}
+  .ratio-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;}
+  .badge{
+    font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.4px;
+  }
+  .badge.pass{background:#e5f7ec;color:var(--ok);}
+  .badge.fail{background:#fbe9eb;color:var(--bad);}
+
+  footer{
+    text-align:center;padding:14px 0 4px;color:var(--ink-soft);font-size:12px;
+  }
+  footer a{color:var(--red);text-decoration:none;font-weight:600;}
+  footer a:hover{text-decoration:underline;}
+
+  ::selection{background:var(--red);color:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-name">TEKNO<span>BIRD</span></div>
+    </div>
+  </div>
+
+  <p class="eyebrow">Renk Araçları</p>
+  <h1>Renk Kodu Bulucu ve Dönüştürücü</h1>
+  <p class="sub">Bir rengi seçin; HEX, RGB, HSL ve CMYK karşılıklarını anında görün, uyumlu renk paletleri oluşturun ve kontrast oranını kontrol edin.</p>
+
+  <div style="height:18px"></div>
+
+  <div class="grid">
+    <!-- LEFT: Picker -->
+    <div class="card picker-panel">
+      <div class="swatch-shell">
+        <div id="swatch"></div>
+        <input type="color" id="native_picker" value="#E63946">
+        <span class="swatch-hint">Renge dokun / tıkla</span>
+      </div>
+
+      <div class="row-btns">
+        <button class="btn btn-primary" id="randomBtn">🎲 Rastgele Renk</button>
+        <button class="btn btn-ghost" id="resetBtn">Sıfırla</button>
+      </div>
+
+      <div class="name-tag">
+        <span class="lbl">Yakın Renk Adı</span>
+        <span class="val" id="colorName">Kırmızı</span>
+      </div>
+
+      <div class="preview-mock">
+        <div class="p-title">Canlı Önizleme</div>
+        <div class="mock-card" id="mockCard">
+          <div class="mock-btn" id="mockBtn">Örnek Buton</div>
+          <div class="mock-text">Bu rengin bir arayüzde nasıl duracağına dair örnek metin.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Formats -->
+    <div class="card formats-panel">
+      <div class="panel-title">Renk Formatları <small>Değiştirin, otomatik senkronize olsun</small></div>
+
+      <div class="fmt-row">
+        <div class="fmt-tag">HEX</div>
+        <input type="text" id="hex_input" maxlength="7" value="#E63946">
+        <button class="copy-btn" data-copy="hex_input" title="Kopyala">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+
+      <div class="fmt-row">
+        <div class="fmt-tag">RGB</div>
+        <input type="text" id="rgb_input" value="rgb(230, 57, 70)">
+        <button class="copy-btn" data-copy="rgb_input" title="Kopyala">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+
+      <div class="fmt-row">
+        <div class="fmt-tag">HSL</div>
+        <input type="text" id="hsl_input" value="hsl(355, 75%, 56%)">
+        <button class="copy-btn" data-copy="hsl_input" title="Kopyala">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+
+      <div class="fmt-row">
+        <div class="fmt-tag">CMYK</div>
+        <input type="text" id="cmyk_input" value="cmyk(0, 75, 70, 10)">
+        <button class="copy-btn" data-copy="cmyk_input" title="Kopyala">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+
+      <div class="sliders">
+        <div class="slider-row">
+          <label>R</label><input type="range" id="r_slider" min="0" max="255" value="230"><output id="r_out">230</output>
+        </div>
+        <div class="slider-row">
+          <label>G</label><input type="range" id="g_slider" min="0" max="255" value="57"><output id="g_out">57</output>
+        </div>
+        <div class="slider-row">
+          <label>B</label><input type="range" id="b_slider" min="0" max="255" value="70"><output id="b_out">70</output>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Harmony -->
+  <div class="card harmony-card">
+    <div class="section-title">Uyumlu Renk Paleti</div>
+    <p class="section-sub">Seçtiğiniz renge göre otomatik oluşturulan tamamlayıcı ve benzer tonlar. Bir kutucuğa tıklayarak ana renk yapabilirsiniz.</p>
+    <div class="harmony-strip" id="harmonyStrip"></div>
+  </div>
+
+  <!-- Contrast -->
+  <div class="card contrast-card">
+    <div class="section-title">Kontrast ve Okunabilirlik</div>
+    <p class="section-sub">Seçilen rengin beyaz ve siyah metinle WCAG kontrast oranı.</p>
+    <div class="contrast-grid">
+      <div class="contrast-box" id="contrastWhiteBox">
+        <span class="big">Aa</span>
+        <span class="small">Beyaz metin üzerinde</span>
+        <div class="ratio-line">
+          <span class="ratio-val" id="ratioWhite">4.50:1</span>
+          <span class="badge" id="badgeWhite">Geçti</span>
+        </div>
+      </div>
+      <div class="contrast-box" id="contrastBlackBox">
+        <span class="big">Aa</span>
+        <span class="small">Siyah metin üzerinde</span>
+        <div class="ratio-line">
+          <span class="ratio-val" id="ratioBlack">4.50:1</span>
+          <span class="badge" id="badgeBlack">Geçti</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Bu araç <a href="https://teknobird.com" target="_blank" rel="noopener">teknobird.com</a> için hazırlanmıştır.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var el = {
+    swatch: document.getElementById('swatch'),
+    native: document.getElementById('native_picker'),
+    hex: document.getElementById('hex_input'),
+    rgb: document.getElementById('rgb_input'),
+    hsl: document.getElementById('hsl_input'),
+    cmyk: document.getElementById('cmyk_input'),
+    rS: document.getElementById('r_slider'),
+    gS: document.getElementById('g_slider'),
+    bS: document.getElementById('b_slider'),
+    rO: document.getElementById('r_out'),
+    gO: document.getElementById('g_out'),
+    bO: document.getElementById('b_out'),
+    colorName: document.getElementById('colorName'),
+    mockCard: document.getElementById('mockCard'),
+    mockBtn: document.getElementById('mockBtn'),
+    harmonyStrip: document.getElementById('harmonyStrip'),
+    ratioWhite: document.getElementById('ratioWhite'),
+    ratioBlack: document.getElementById('ratioBlack'),
+    badgeWhite: document.getElementById('badgeWhite'),
+    badgeBlack: document.getElementById('badgeBlack'),
+    contrastWhiteBox: document.getElementById('contrastWhiteBox'),
+    contrastBlackBox: document.getElementById('contrastBlackBox'),
+    randomBtn: document.getElementById('randomBtn'),
+    resetBtn: document.getElementById('resetBtn')
+  };
+
+  var DEFAULT = '#E63946';
+
+  // ---------- color conversions ----------
+  function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+
+  function hexToRgb(hex){
+    hex = hex.replace('#','');
+    if(hex.length === 3){ hex = hex.split('').map(function(c){return c+c;}).join(''); }
+    var num = parseInt(hex, 16);
+    if(isNaN(num) || hex.length !== 6) return null;
+    return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+  }
+  function rgbToHex(r,g,b){
+    return '#' + [r,g,b].map(function(x){
+      var h = clamp(Math.round(x),0,255).toString(16);
+      return h.length===1 ? '0'+h : h;
+    }).join('').toUpperCase();
+  }
+  function rgbToHsl(r,g,b){
+    r/=255; g/=255; b/=255;
+    var max=Math.max(r,g,b), min=Math.min(r,g,b);
+    var h,s,l=(max+min)/2;
+    if(max===min){ h=s=0; }
+    else{
+      var d = max-min;
+      s = l>0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max){
+        case r: h=(g-b)/d+(g<b?6:0); break;
+        case g: h=(b-r)/d+2; break;
+        case b: h=(r-g)/d+4; break;
+      }
+      h/=6;
+    }
+    return { h:Math.round(h*360), s:Math.round(s*100), l:Math.round(l*100) };
+  }
+  function hslToRgb(h,s,l){
+    h/=360; s/=100; l/=100;
+    var r,g,b;
+    if(s===0){ r=g=b=l; }
+    else{
+      var hue2rgb = function(p,q,t){
+        if(t<0) t+=1;
+        if(t>1) t-=1;
+        if(t<1/6) return p+(q-p)*6*t;
+        if(t<1/2) return q;
+        if(t<2/3) return p+(q-p)*(2/3-t)*6;
+        return p;
+      };
+      var q = l<0.5 ? l*(1+s) : l+s-l*s;
+      var p = 2*l-q;
+      r = hue2rgb(p,q,h+1/3);
+      g = hue2rgb(p,q,h);
+      b = hue2rgb(p,q,h-1/3);
+    }
+    return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255) };
+  }
+  function rgbToCmyk(r,g,b){
+    if(r===0 && g===0 && b===0) return {c:0,m:0,y:0,k:100};
+    var rr=r/255, gg=g/255, bb=b/255;
+    var k = 1-Math.max(rr,gg,bb);
+    var c = (1-rr-k)/(1-k);
+    var m = (1-gg-k)/(1-k);
+    var y = (1-bb-k)/(1-k);
+    return { c:Math.round(c*100), m:Math.round(m*100), y:Math.round(y*100), k:Math.round(k*100) };
+  }
+
+  // simple nearest color-name table (curated, small)
+  var NAMES = [
+    ['#FF0000','Kırmızı'],['#E63946','Ateş Kırmızısı'],['#8B0000','Bordo'],
+    ['#FFA500','Turuncu'],['#FFD700','Altın Sarısı'],['#FFFF00','Sarı'],
+    ['#ADFF2F','Sarı-Yeşil'],['#008000','Yeşil'],['#00FF7F','Nane Yeşili'],
+    ['#008080','Deniz Mavisi'],['#00FFFF','Camgöbeği'],['#0000FF','Mavi'],
+    ['#1E90FF','Gökyüzü Mavisi'],['#4B0082','Çivit'],['#800080','Mor'],
+    ['#FF00FF','Macenta'],['#FFC0CB','Pembe'],['#A52A2A','Kahverengi'],
+    ['#000000','Siyah'],['#808080','Gri'],['#FFFFFF','Beyaz'],
+    ['#C0C0C0','Gümüş'],['#F5F5DC','Bej'],['#40E0D0','Turkuaz']
+  ];
+  function nearestName(r,g,b){
+    var best=null,bestD=Infinity;
+    NAMES.forEach(function(n){
+      var c = hexToRgb(n[0]);
+      var d = Math.pow(c.r-r,2)+Math.pow(c.g-g,2)+Math.pow(c.b-b,2);
+      if(d<bestD){bestD=d; best=n[1];}
+    });
+    return best;
+  }
+
+  function luminance(r,g,b){
+    var a = [r,g,b].map(function(v){
+      v/=255;
+      return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+    });
+    return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2];
+  }
+  function contrastRatio(rgb1, rgb2){
+    var l1 = luminance(rgb1.r,rgb1.g,rgb1.b)+0.05;
+    var l2 = luminance(rgb2.r,rgb2.g,rgb2.b)+0.05;
+    return l1>l2 ? l1/l2 : l2/l1;
+  }
+
+  var state = { r:230,g:57,b:70 };
+
+  function setState(r,g,b, source){
+    r=clamp(Math.round(r),0,255); g=clamp(Math.round(g),0,255); b=clamp(Math.round(b),0,255);
+    state = {r:r,g:g,b:b};
+    render(source);
+  }
+
+  function render(source){
+    var hex = rgbToHex(state.r,state.g,state.b);
+    var hsl = rgbToHsl(state.r,state.g,state.b);
+    var cmyk = rgbToCmyk(state.r,state.g,state.b);
+
+    el.swatch.style.backgroundColor = hex;
+    el.native.value = hex;
+
+    if(source!=='hex') el.hex.value = hex;
+    if(source!=='rgb') el.rgb.value = 'rgb(' + state.r + ', ' + state.g + ', ' + state.b + ')';
+    if(source!=='hsl') el.hsl.value = 'hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)';
+    if(source!=='cmyk') el.cmyk.value = 'cmyk(' + cmyk.c + ', ' + cmyk.m + ', ' + cmyk.y + ', ' + cmyk.k + ')';
+
+    if(source!=='sliders'){
+      el.rS.value = state.r; el.gS.value = state.g; el.bS.value = state.b;
+    }
+    el.rO.textContent = state.r; el.gO.textContent = state.g; el.bO.textContent = state.b;
+
+    el.colorName.textContent = nearestName(state.r,state.g,state.b);
+
+    // mock preview
+    el.mockCard.style.background = hexToRgba(hex, 0.08);
+    el.mockBtn.style.background = hex;
+    el.mockBtn.style.color = contrastRatio(state, {r:255,g:255,b:255}) >= contrastRatio(state,{r:0,g:0,b:0}) ? '#fff' : '#111';
+
+    // contrast
+    var rw = contrastRatio(state, {r:255,g:255,b:255});
+    var rb = contrastRatio(state, {r:0,g:0,b:0});
+    el.ratioWhite.textContent = rw.toFixed(2) + ':1';
+    el.ratioBlack.textContent = rb.toFixed(2) + ':1';
+    setBadge(el.badgeWhite, rw);
+    setBadge(el.badgeBlack, rb);
+    el.contrastWhiteBox.style.background = hex;
+    el.contrastWhiteBox.querySelector('.big').style.color = '#fff';
+    el.contrastWhiteBox.querySelector('.small').style.color = 'rgba(255,255,255,.85)';
+    el.contrastBlackBox.style.background = hex;
+    el.contrastBlackBox.querySelector('.big').style.color = '#000';
+    el.contrastBlackBox.querySelector('.small').style.color = 'rgba(0,0,0,.65)';
+
+    renderHarmony(hsl);
+  }
+
+  function setBadge(node, ratio){
+    if(ratio >= 4.5){ node.textContent='AA Geçti'; node.className='badge pass'; }
+    else if(ratio >= 3){ node.textContent='Sadece Büyük Metin'; node.className='badge fail'; }
+    else { node.textContent='Başarısız'; node.className='badge fail'; }
+  }
+
+  function hexToRgba(hex, alpha){
+    var c = hexToRgb(hex);
+    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+  }
+
+  function renderHarmony(hsl){
+    var defs = [
+      { label:'Tamamlayıcı', h:(hsl.h+180)%360 },
+      { label:'Analog +30°', h:(hsl.h+30)%360 },
+      { label:'Analog -30°', h:(hsl.h+330)%360 },
+      { label:'Triadik +120°', h:(hsl.h+120)%360 },
+      { label:'Triadik +240°', h:(hsl.h+240)%360 }
+    ];
+    el.harmonyStrip.innerHTML = '';
+    defs.forEach(function(d){
+      var rgb = hslToRgb(d.h, hsl.s, hsl.l);
+      var hex = rgbToHex(rgb.r,rgb.g,rgb.b);
+      var box = document.createElement('div');
+      box.className = 'h-swatch';
+      box.innerHTML = '<div class="fill" style="background:'+hex+'"></div>' +
+                       '<div class="tag"><small>'+d.label+'</small>'+hex+'</div>';
+      box.addEventListener('click', function(){
+        setState(rgb.r, rgb.g, rgb.b);
+      });
+      el.harmonyStrip.appendChild(box);
+    });
+  }
+
+  // ---------- events ----------
+  el.native.addEventListener('input', function(){
+    var c = hexToRgb(this.value);
+    if(c) setState(c.r,c.g,c.b);
+  });
+
+  el.hex.addEventListener('change', function(){
+    var v = this.value.trim();
+    if(v[0] !== '#') v = '#'+v;
+    var c = hexToRgb(v);
+    if(c) setState(c.r,c.g,c.b,'hex');
+    else this.value = rgbToHex(state.r,state.g,state.b);
+  });
+
+  el.rgb.addEventListener('change', function(){
+    var m = this.value.match(/(\d+)\D+(\d+)\D+(\d+)/);
+    if(m) setState(+m[1], +m[2], +m[3], 'rgb');
+    else render();
+  });
+
+  el.hsl.addEventListener('change', function(){
+    var m = this.value.match(/(\d+)\D+(\d+)\D+(\d+)/);
+    if(m){
+      var rgb = hslToRgb(+m[1], +m[2], +m[3]);
+      setState(rgb.r, rgb.g, rgb.b, 'hsl');
+    } else render();
+  });
+
+  el.cmyk.addEventListener('change', function(){
+    var m = this.value.match(/(\d+)\D+(\d+)\D+(\d+)\D+(\d+)/);
+    if(m){
+      var c=+m[1]/100, mm=+m[2]/100, y=+m[3]/100, k=+m[4]/100;
+      var r = 255*(1-c)*(1-k);
+      var g = 255*(1-mm)*(1-k);
+      var b = 255*(1-y)*(1-k);
+      setState(r,g,b,'cmyk');
+    } else render();
+  });
+
+  [el.rS, el.gS, el.bS].forEach(function(s){
+    s.addEventListener('input', function(){
+      setState(+el.rS.value, +el.gS.value, +el.bS.value, 'sliders');
+    });
+  });
+
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var target = document.getElementById(btn.getAttribute('data-copy'));
+      var text = target.value;
+      var done = function(){
+        var original = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        btn.style.color = '#1E9E5A';
+        btn.style.borderColor = '#1E9E5A';
+        setTimeout(function(){
+          btn.innerHTML = original;
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 1100);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(function(){
+          fallbackCopy(text); done();
+        });
+      } else {
+        fallbackCopy(text); done();
+      }
+    });
+  });
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+
+  el.randomBtn.addEventListener('click', function(){
+    setState(Math.random()*255, Math.random()*255, Math.random()*255);
+  });
+  el.resetBtn.addEventListener('click', function(){
+    var c = hexToRgb(DEFAULT);
+    setState(c.r,c.g,c.b);
+  });
+
+  // init
+  var initC = hexToRgb(DEFAULT);
+  setState(initC.r, initC.g, initC.b);
+})();
+</script>
+</body>
+</html>
